@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude API Cost Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .drop-zone {
+            border: 2px dashed #4F46E5;
+            transition: all 0.3s ease;
+        }
+        .drop-zone.active {
+            border-color: #4338CA;
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center text-indigo-700 mb-8">Claude API Cost Analyzer</h1>
+
+        <!-- File Upload Area -->
+        <div id="dropZone" class="drop-zone rounded-lg p-12 text-center mb-8 cursor-pointer">
+            <div class="flex flex-col items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-indigo-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                <p class="text-lg font-medium text-gray-700">Drag & drop your CSV file here</p>
+                <p class="text-sm text-gray-500 mt-1">or</p>
+                <label for="fileInput" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 cursor-pointer">
+                    Browse Files
+                </label>
+                <input id="fileInput" type="file" accept=".csv" class="hidden" />
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div id="filtersContainer" class="mb-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Filters</h2>
+            <div id="filters" class="flex flex-wrap gap-4"></div>
+        </div>
+
+        <!-- Results Table -->
+        <div id="resultsContainer" class="hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Results</h2>
+            <div class="overflow-x-auto rounded-lg md:shadow">
+                <table id="resultsTable" class="min-w-full md:bg-white block md:table w-full">
+                    <thead class="bg-indigo-600 text-white hidden md:table-header-group">
+                        <tr id="tableHeader"></tr>
+                    </thead>
+                    <tbody id="tableBody" class="block md:table-row-group w-full"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pricing Form -->
+        <div id="pricingForm" class="mt-12 bg-white p-6 rounded-lg shadow-md hidden">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Pricing Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="font-medium text-gray-700 mb-2">Haiku Pricing ($ per million tokens)</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-1">Input Tokens</label>
+                        <input type="number" id="haikuInput" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-1">Cache Write</label>
+                        <input type="number" id="haikuCacheWrite" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-1">Cache Read</label>
+                        <input type="number" id="haikuCacheRead" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Output Tokens</label>
+                        <input type="number" id="haikuOutput" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-medium text-gray-700 mb-2">Sonnet Pricing ($ per million tokens)</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-1">Input Tokens</label>
+                        <input type="number" id="sonnetInput" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-1">Cache Write</label>
+                        <input type="number" id="sonnetCacheWrite" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-1">Cache Read</label>
+                        <input type="number" id="sonnetCacheRead" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Output Tokens</label>
+                        <input type="number" id="sonnetOutput" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-medium text-gray-700 mb-2">Opus Pricing ($ per million tokens)</h3>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-1">Input Tokens</label>
+                        <input type="number" id="opusInput" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-1">Cache Write</label>
+                        <input type="number" id="opusCacheWrite" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-600 mb-1">Cache Read</label>
+                        <input type="number" id="opusCacheRead" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-600 mb-1">Output Tokens</label>
+                        <input type="number" id="opusOutput" step="0.01" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                </div>
+            </div>
+            <button id="savePricing" class="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                Save Pricing
+            </button>
+        </div>
+    </div>
+
+    <script>
+
+        let pricing = {
+            haiku: { 
+                input: 0.80, 
+                cache_write: 1.00,
+                cache_read: 0.08,
+                output: 4.00 
+            },
+            sonnet: { 
+                input: 3.00, 
+                cache_write: 3.75,
+                cache_read: 0.30,
+                output: 15.00 
+            },
+            opus: { 
+                input: 15.00, 
+                cache_write: 18.75,
+                cache_read: 1.50,
+                output: 75.00 
+            }
+        };
+
+        function loadPricing() {
+            const savedPricing = localStorage.getItem('claudePricing');
+            if (savedPricing) {
+                pricing = JSON.parse(savedPricing);
+            }
+
+            document.getElementById('haikuInput').value = pricing.haiku.input;
+            document.getElementById('haikuOutput').value = pricing.haiku.output;
+            document.getElementById('sonnetInput').value = pricing.sonnet.input;
+            document.getElementById('sonnetOutput').value = pricing.sonnet.output;
+            document.getElementById('opusInput').value = pricing.opus.input;
+            document.getElementById('opusOutput').value = pricing.opus.output;
+
+            if (document.getElementById('haikuCacheWrite')) {
+                document.getElementById('haikuCacheWrite').value = pricing.haiku.cache_write;
+                document.getElementById('haikuCacheRead').value = pricing.haiku.cache_read;
+                document.getElementById('sonnetCacheWrite').value = pricing.sonnet.cache_write;
+                document.getElementById('sonnetCacheRead').value = pricing.sonnet.cache_read;
+                document.getElementById('opusCacheWrite').value = pricing.opus.cache_write;
+                document.getElementById('opusCacheRead').value = pricing.opus.cache_read;
+            }
+        }
+
+        let filters = {
+            model_version: undefined,
+            api_key: undefined,
+            workspace: undefined
+        };
+
+        function loadFilters() {
+            const savedFilters = localStorage.getItem('claudeFilters');
+            if (savedFilters) {
+                filters = JSON.parse(savedFilters);
+            }
+            return filters;
+        }
+
+        function saveFilters(filters) {
+            localStorage.setItem('claudeFilters', JSON.stringify(filters));
+        }
+
+        document.getElementById('savePricing').addEventListener('click', function() {
+            pricing.haiku.input = parseFloat(document.getElementById('haikuInput').value);
+            pricing.haiku.output = parseFloat(document.getElementById('haikuOutput').value);
+            pricing.sonnet.input = parseFloat(document.getElementById('sonnetInput').value);
+            pricing.sonnet.output = parseFloat(document.getElementById('sonnetOutput').value);
+            pricing.opus.input = parseFloat(document.getElementById('opusInput').value);
+            pricing.opus.output = parseFloat(document.getElementById('opusOutput').value);
+
+            if (document.getElementById('haikuCacheWrite')) {
+                pricing.haiku.cache_write = parseFloat(document.getElementById('haikuCacheWrite').value);
+                pricing.haiku.cache_read = parseFloat(document.getElementById('haikuCacheRead').value);
+                pricing.sonnet.cache_write = parseFloat(document.getElementById('sonnetCacheWrite').value);
+                pricing.sonnet.cache_read = parseFloat(document.getElementById('sonnetCacheRead').value);
+                pricing.opus.cache_write = parseFloat(document.getElementById('opusCacheWrite').value);
+                pricing.opus.cache_read = parseFloat(document.getElementById('opusCacheRead').value);
+            }
+
+            localStorage.setItem('claudePricing', JSON.stringify(pricing));
+
+            if (window.csvData) {
+                processData(window.csvData);
+            }
+
+            alert('Pricing saved successfully!');
+        });
+
+        function calculateCost(item) {
+            const model = item.model_version.toLowerCase();
+            let modelPricing;
+
+            if (model.includes('haiku')) {
+                modelPricing = pricing.haiku;
+            } else if (model.includes('sonnet')) {
+                modelPricing = pricing.sonnet;
+            } else if (model.includes('opus')) {
+                modelPricing = pricing.opus;
+            } else {
+
+                modelPricing = pricing.sonnet;
+            }
+
+            const inputTokens = parseInt(item.usage_input_tokens_no_cache || 0);
+            const cacheWriteTokens = parseInt(item.usage_input_tokens_cache_write || 0);
+            const cacheReadTokens = parseInt(item.usage_input_tokens_cache_read || 0);
+            const outputTokens = parseInt(item.usage_output_tokens || 0);
+
+            const inputCost = (inputTokens * modelPricing.input) / 1000000;
+            const cacheWriteCost = (cacheWriteTokens * modelPricing.cache_write) / 1000000;
+            const cacheReadCost = (cacheReadTokens * modelPricing.cache_read) / 1000000;
+            const outputCost = (outputTokens * modelPricing.output) / 1000000;
+
+            const totalCost = inputCost + cacheWriteCost + cacheReadCost + outputCost;
+
+            return {
+                totalCost,
+                details: {
+                    inputTokens,
+                    cacheWriteTokens,
+                    cacheReadTokens,
+                    outputTokens,
+                    inputCost,
+                    cacheWriteCost,
+                    cacheReadCost,
+                    outputCost
+                }
+            };
+        }
+
+        const dropZone = document.body;
+        const fileInput = document.getElementById('fileInput');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropZone.classList.add('active');
+        }
+
+        function unhighlight() {
+            dropZone.classList.remove('active');
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+        fileInput.addEventListener('change', handleFiles, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles({ target: { files } });
+        }
+
+        function handleFiles(e) {
+            const file = e.target.files[0];
+            if (file && file.type === 'text/csv') {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const csvData = e.target.result;
+                    window.csvData = csvData;
+                    processData();
+                };
+                reader.readAsText(file);
+            } else {
+                alert('Please upload a CSV file.');
+            }
+        }
+
+        function processData() {
+
+            const lines = csvData.split('\n');
+            const headers = lines[0].split(',');
+
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+
+                const values = lines[i].split(',');
+                const entry = {};
+
+                headers.forEach((header, index) => {
+                    entry[header] = values[index];
+                });
+
+                data.push(entry);
+            }
+
+            let filteredData = data;
+            if (filters) {
+                filteredData = data.filter(item => {
+                    for (const [column, value] of Object.entries(filters)) {
+                        if (value && item[column] !== value) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+            }
+
+            const groupedByDate = {};
+
+            filteredData.forEach(entry => {
+                const date = entry.usage_date_utc;
+
+                if (!groupedByDate[date]) {
+                    groupedByDate[date] = {
+                        usage_date_utc: date,
+                        models: new Set(),
+                        api_keys: new Set(),
+                        workspaces: new Set(),
+                        total_input_tokens: 0,
+                        total_output_tokens: 0,
+                        total_cost: 0
+                    };
+                }
+
+                groupedByDate[date].models.add(entry.model_version);
+                groupedByDate[date].api_keys.add(entry.api_key);
+                groupedByDate[date].workspaces.add(entry.workspace);
+
+                const inputTokens = parseInt(entry.usage_input_tokens_no_cache || 0) + 
+                                   parseInt(entry.usage_input_tokens_cache_write || 0) + 
+                                   parseInt(entry.usage_input_tokens_cache_read || 0);
+                const outputTokens = parseInt(entry.usage_output_tokens || 0);
+
+                groupedByDate[date].total_input_tokens += inputTokens;
+                groupedByDate[date].total_output_tokens += outputTokens;
+                groupedByDate[date].total_cost += calculateCost(entry).totalCost;
+            });
+
+            const groupedData = Object.values(groupedByDate).map(item => {
+                return {
+                    ...item,
+                    models: Array.from(item.models).join(', '),
+                    api_keys: Array.from(item.api_keys).join(', '),
+                    workspaces: Array.from(item.workspaces).join(', ')
+                };
+            });
+
+            createFilters(data);
+
+            displayResults(groupedData);
+
+            document.getElementById('dropZone').classList.add('hidden');
+            document.getElementById('filtersContainer').classList.remove('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+            document.getElementById('pricingForm').classList.remove('hidden');
+        }
+
+        function formatColumnName(column) {
+            switch(column) {
+                case 'model_version':
+                    return 'Model';
+                case 'api_key':
+                    return 'API Key';
+                case 'workspace':
+                    return 'Workspace';
+                default:
+
+                    return column
+                        .split('_')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ');
+            }
+        }
+
+        function createFilters(data) {
+            const filtersContainer = document.getElementById('filters');
+            filtersContainer.innerHTML = '';
+
+            const filterColumns = ['model_version', 'api_key', 'workspace'];
+
+            filterColumns.forEach(column => {
+                const uniqueValues = new Set();
+                data.forEach(item => uniqueValues.add(item[column]));
+
+                const filterGroup = document.createElement('div');
+                filterGroup.className = 'filter-group';
+
+                const label = document.createElement('label');
+                label.className = 'block text-sm font-medium text-gray-700 mb-1';
+                label.textContent = formatColumnName(column);
+
+                const select = document.createElement('select');
+                select.className = 'filter-select bg-white border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500';
+                select.dataset.column = column;
+
+                const allOption = document.createElement('option');
+                allOption.value = 'all';
+                allOption.textContent = 'All';
+                select.appendChild(allOption);
+
+                Array.from(uniqueValues).sort().forEach(value => {
+                    if (!value) return;
+                    const option = document.createElement('option');
+                    option.value = value;
+                    option.textContent = value;
+                    select.appendChild(option);
+                });
+
+                if (filters[column]) {
+                    select.value = filters[column];
+                }
+
+                select.addEventListener('change', function() {
+
+                    if (this.value === 'all') {
+                        filters[column] = undefined;
+                    } else {
+                        filters[column] = this.value;
+                    }
+
+                    saveFilters(filters);
+                    processData();
+                });
+
+                filterGroup.appendChild(label);
+                filterGroup.appendChild(select);
+                filtersContainer.appendChild(filterGroup);
+            });
+
+            const clearButton = document.createElement('button');
+            clearButton.className = 'mt-auto px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md text-sm';
+            clearButton.textContent = 'Clear Filters';
+            clearButton.addEventListener('click', () => {
+                document.querySelectorAll('.filter-select').forEach(select => {
+                    select.value = 'all';
+                });
+                processData();
+            });
+            filtersContainer.appendChild(clearButton);
+        }
+
+        function displayResults(data) {
+            const resultsContainer = document.getElementById('resultsContainer');
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            resultsContainer.classList.remove('hidden');
+
+            if (data.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No data available</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const headers = [
+                'Date', 'Models', 'API Keys', 'Workspaces', 
+                'Input Tokens', 'Output Tokens', 'Total Cost'
+            ];
+
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.className = 'px-6 py-3 text-left text-sm font-medium';
+                th.textContent = header;
+                tableHeader.appendChild(th);
+            });
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-200 hover:bg-gray-50 block md:table-row mb-6 md:mb-0 border md:border-none rounded-lg md:rounded-none shadow md:shadow-none';
+
+                const dateCell = document.createElement('td');
+                dateCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                dateCell.setAttribute('data-label', 'Date');
+
+                const dateLabel = document.createElement('span');
+                dateLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                dateLabel.textContent = 'Date:';
+                dateCell.appendChild(dateLabel);
+
+                const dateValue = document.createElement('span');
+                dateValue.className = 'inline-block w-3/4 md:w-full';
+                dateValue.textContent = item.usage_date_utc;
+                dateCell.appendChild(dateValue);
+
+                row.appendChild(dateCell);
+
+                const modelsCell = document.createElement('td');
+                modelsCell.className = 'px-6 py-4 text-sm flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                modelsCell.setAttribute('data-label', 'Models');
+
+                const modelsLabel = document.createElement('span');
+                modelsLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                modelsLabel.textContent = 'Models:';
+                modelsCell.appendChild(modelsLabel);
+
+                const modelsValue = document.createElement('span');
+                modelsValue.className = 'inline-block w-3/4 md:w-full';
+
+                const models = item.models.split(',').map(m => m.trim()).filter(m => m);
+                models.forEach(model => {
+                    const tag = document.createElement('span');
+                    tag.className = 'inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full mr-1 mb-1';
+
+                    let displayName = model.replace(/^claude-/, '').replace(/-\d{4}$/, '');
+                    tag.textContent = displayName;
+
+                    tag.title = model;
+                    tag.setAttribute('data-tooltip', model);
+
+                    modelsValue.appendChild(tag);
+                });
+                modelsCell.appendChild(modelsValue);
+                row.appendChild(modelsCell);
+
+                const apiKeysCell = document.createElement('td');
+                apiKeysCell.className = 'px-6 py-4 text-sm flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                apiKeysCell.setAttribute('data-label', 'API Keys');
+
+                const apiKeysLabel = document.createElement('span');
+                apiKeysLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                apiKeysLabel.textContent = 'API Keys:';
+                apiKeysCell.appendChild(apiKeysLabel);
+
+                const apiKeysValue = document.createElement('span');
+                apiKeysValue.className = 'inline-block w-3/4 md:w-full';
+
+                const apiKeys = item.api_keys.split(',').map(k => k.trim()).filter(k => k);
+                apiKeys.forEach(apiKey => {
+                    const tag = document.createElement('span');
+                    tag.className = 'inline-block bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full mr-1 mb-1';
+                    tag.textContent = apiKey;
+                    apiKeysValue.appendChild(tag);
+                });
+                apiKeysCell.appendChild(apiKeysValue);
+                row.appendChild(apiKeysCell);
+
+                const workspacesCell = document.createElement('td');
+                workspacesCell.className = 'px-6 py-4 text-sm flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                workspacesCell.setAttribute('data-label', 'Workspaces');
+
+                const workspacesLabel = document.createElement('span');
+                workspacesLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                workspacesLabel.textContent = 'Workspaces:';
+                workspacesCell.appendChild(workspacesLabel);
+
+                const workspacesValue = document.createElement('span');
+                workspacesValue.className = 'inline-block w-3/4 md:w-full';
+
+                const workspaces = item.workspaces.split(',').map(w => w.trim()).filter(w => w);
+                workspaces.forEach(workspace => {
+                    const tag = document.createElement('span');
+                    tag.className = 'inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1';
+                    tag.textContent = workspace;
+                    workspacesValue.appendChild(tag);
+                });
+                workspacesCell.appendChild(workspacesValue);
+                row.appendChild(workspacesCell);
+
+                const inputTokensCell = document.createElement('td');
+                inputTokensCell.className = 'px-6 py-4 text-sm text-gray-500 flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                inputTokensCell.setAttribute('data-label', 'Input Tokens');
+
+                const inputTokensLabel = document.createElement('span');
+                inputTokensLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                inputTokensLabel.textContent = 'Input Tokens:';
+                inputTokensCell.appendChild(inputTokensLabel);
+
+                const inputTokensValue = document.createElement('span');
+                inputTokensValue.className = 'inline-block w-3/4 md:w-full';
+                inputTokensValue.textContent = item.total_input_tokens.toLocaleString();
+                inputTokensCell.appendChild(inputTokensValue);
+
+                row.appendChild(inputTokensCell);
+
+                const outputTokensCell = document.createElement('td');
+                outputTokensCell.className = 'px-6 py-4 text-sm text-gray-500 flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                outputTokensCell.setAttribute('data-label', 'Output Tokens');
+
+                const outputTokensLabel = document.createElement('span');
+                outputTokensLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                outputTokensLabel.textContent = 'Output Tokens:';
+                outputTokensCell.appendChild(outputTokensLabel);
+
+                const outputTokensValue = document.createElement('span');
+                outputTokensValue.className = 'inline-block w-3/4 md:w-full';
+                outputTokensValue.textContent = item.total_output_tokens.toLocaleString();
+                outputTokensCell.appendChild(outputTokensValue);
+
+                row.appendChild(outputTokensCell);
+
+                const costCell = document.createElement('td');
+                costCell.className = 'px-6 py-4 text-sm text-gray-900 font-medium flex md:table-cell text-right md:text-left border-b-0';
+                costCell.setAttribute('data-label', 'Total Cost');
+
+                const costLabel = document.createElement('span');
+                costLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                costLabel.textContent = 'Total Cost:';
+                costCell.appendChild(costLabel);
+
+                const costValue = document.createElement('span');
+                costValue.className = 'inline-block w-3/4 md:w-full';
+                costValue.textContent = `$${item.total_cost.toFixed(2)}`;
+                costCell.appendChild(costValue);
+
+                row.appendChild(costCell);
+
+                tableBody.appendChild(row);
+            });
+
+            if (data.length > 0) {
+
+                const totalInputTokens = data.reduce((sum, item) => sum + item.total_input_tokens, 0);
+                const totalOutputTokens = data.reduce((sum, item) => sum + item.total_output_tokens, 0);
+                const totalCost = data.reduce((sum, item) => sum + item.total_cost, 0);
+
+                const totalsRow = document.createElement('tr');
+                totalsRow.className = 'bg-gray-100 font-bold border-t-2 border-gray-300 block md:table-row mb-6 md:mb-0';
+
+                const totalLabelCell = document.createElement('td');
+                totalLabelCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                totalLabelCell.setAttribute('data-label', 'Date');
+
+                const totalLabel = document.createElement('span');
+                totalLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                totalLabel.textContent = 'Date:';
+                totalLabelCell.appendChild(totalLabel);
+
+                const totalValue = document.createElement('span');
+                totalValue.className = 'inline-block w-3/4 md:w-full';
+                totalValue.textContent = 'TOTAL';
+                totalLabelCell.appendChild(totalValue);
+
+                totalsRow.appendChild(totalLabelCell);
+
+                const emptyLabels = ['Models', 'API Keys', 'Workspaces'];
+                for (let i = 0; i < 3; i++) {
+                    const emptyCell = document.createElement('td');
+                    emptyCell.className = 'px-6 py-4 text-sm text-gray-500 hidden md:table-cell text-left border-b-0';
+                    emptyCell.setAttribute('data-label', emptyLabels[i]);
+
+                    const emptyValueSpan = document.createElement('span');
+                    emptyValueSpan.className = 'w-full';
+                    emptyValueSpan.textContent = '';
+                    emptyCell.appendChild(emptyValueSpan);
+
+                    totalsRow.appendChild(emptyCell);
+                }
+
+                const totalInputTokensCell = document.createElement('td');
+                totalInputTokensCell.className = 'px-6 py-4 text-sm text-gray-900 font-bold flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                totalInputTokensCell.setAttribute('data-label', 'Input Tokens');
+
+                const inputTokensLabel = document.createElement('span');
+                inputTokensLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                inputTokensLabel.textContent = 'Input Tokens:';
+                totalInputTokensCell.appendChild(inputTokensLabel);
+
+                const inputTokensValue = document.createElement('span');
+                inputTokensValue.className = 'inline-block w-3/4 md:w-full';
+                inputTokensValue.textContent = totalInputTokens.toLocaleString();
+                totalInputTokensCell.appendChild(inputTokensValue);
+
+                totalsRow.appendChild(totalInputTokensCell);
+
+                const totalOutputTokensCell = document.createElement('td');
+                totalOutputTokensCell.className = 'px-6 py-4 text-sm text-gray-900 font-bold flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                totalOutputTokensCell.setAttribute('data-label', 'Output Tokens');
+
+                const outputTokensLabel = document.createElement('span');
+                outputTokensLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                outputTokensLabel.textContent = 'Output Tokens:';
+                totalOutputTokensCell.appendChild(outputTokensLabel);
+
+                const outputTokensValue = document.createElement('span');
+                outputTokensValue.className = 'inline-block w-3/4 md:w-full';
+                outputTokensValue.textContent = totalOutputTokens.toLocaleString();
+                totalOutputTokensCell.appendChild(outputTokensValue);
+
+                totalsRow.appendChild(totalOutputTokensCell);
+
+                const totalCostCell = document.createElement('td');
+                totalCostCell.className = 'px-6 py-4 text-sm text-gray-900 font-bold flex md:table-cell text-right md:text-left border-b-0';
+                totalCostCell.setAttribute('data-label', 'Total Cost');
+
+                const costLabel = document.createElement('span');
+                costLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                costLabel.textContent = 'Total Cost:';
+                totalCostCell.appendChild(costLabel);
+
+                const costValue = document.createElement('span');
+                costValue.className = 'inline-block w-3/4 md:w-full';
+                costValue.textContent = `$${totalCost.toFixed(2)}`;
+                totalCostCell.appendChild(costValue);
+
+                totalsRow.appendChild(totalCostCell);
+
+                tableBody.appendChild(totalsRow);
+            }
+        }
+
+        loadPricing();
+        loadFilters();
+    </script>
+</body>
+</html>
