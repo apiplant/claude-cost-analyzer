@@ -73,8 +73,11 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <p class="text-lg font-medium text-gray-700">Drag & drop your CSV here</p>
                 <p class="text-sm text-gray-500 mt-1">Get your CSV from <a href="https://console.anthropic.com/settings/usage" class="text-apiplant-600 hover:underline" target="_blank">Anthropic Console Usage</a></p>
+                <p class="text-sm text-gray-500 mt-3">All processing happens locally in your browser. No data is uploaded to any server.</p>
+                <p class="text-sm text-gray-500">Your privacy is protected - your usage data never leaves your device.</p>
+                <br />
+                <p class="text-lg font-medium text-gray-700">Drag & drop your CSV here</p>
                 <p class="text-sm text-gray-500 mt-1">or</p>
                 <label for="fileInput"
                     class="mt-4 px-4 py-2 bg-apiplant-600 text-white rounded-md hover:bg-apiplant-700 cursor-pointer">
@@ -93,12 +96,12 @@
         <!-- Results Table -->
         <div id="resultsContainer" class="hidden">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Results</h2>
-            <div class="overflow-x-auto rounded-lg md:shadow">
-                <table id="resultsTable" class="min-w-full md:bg-white block md:table w-full">
-                    <thead class="bg-apiplant-600 text-white hidden md:table-header-group">
+            <div class="overflow-x-auto rounded-lg lg:shadow">
+                <table id="resultsTable" class="min-w-full lg:bg-white block lg:table w-full">
+                    <thead class="bg-apiplant-600 text-white hidden lg:table-header-group">
                         <tr id="tableHeader"></tr>
                     </thead>
-                    <tbody id="tableBody" class="block md:table-row-group w-full"></tbody>
+                    <tbody id="tableBody" class="block lg:table-row-group w-full"></tbody>
                 </table>
             </div>
         </div>
@@ -106,7 +109,7 @@
         <!-- Pricing Form -->
         <div id="pricingForm" class="mt-12 bg-white p-6 rounded-lg shadow-md hidden">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Pricing Configuration</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div>
                     <h3 class="font-medium text-gray-700 mb-2">Haiku Pricing ($ per million tokens)</h3>
                     <div class="mb-4">
@@ -570,35 +573,35 @@
 
             data.forEach(item => {
                 const row = document.createElement('tr');
-                row.className = 'border-b border-gray-200 hover:bg-gray-50 block md:table-row mb-6 md:mb-0 border md:border-none rounded-lg md:rounded-none shadow md:shadow-none';
+                row.className = 'border-b border-gray-200 hover:bg-gray-50 block lg:table-row mb-6 lg:mb-0 border lg:border-none rounded-lg lg:rounded-none shadow lg:shadow-none';
 
                 const dateCell = document.createElement('td');
-                dateCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                dateCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex lg:table-cell text-right lg:text-left border-b lg:border-b-0';
                 dateCell.setAttribute('data-label', 'Date');
 
                 const dateLabel = document.createElement('span');
-                dateLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                dateLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 dateLabel.textContent = 'Date:';
                 dateCell.appendChild(dateLabel);
 
                 const dateValue = document.createElement('span');
-                dateValue.className = 'inline-block w-3/4 md:w-full';
+                dateValue.className = 'inline-block w-3/4 lg:w-full';
                 dateValue.textContent = item.usage_date_utc;
                 dateCell.appendChild(dateValue);
 
                 row.appendChild(dateCell);
 
                 const modelsCell = document.createElement('td');
-                modelsCell.className = 'px-6 py-4 text-sm flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                modelsCell.className = 'px-6 py-4 text-sm flex lg:table-cell text-right lg:text-left border-b lg:border-b-0';
                 modelsCell.setAttribute('data-label', 'Models');
 
                 const modelsLabel = document.createElement('span');
-                modelsLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                modelsLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 modelsLabel.textContent = 'Models:';
                 modelsCell.appendChild(modelsLabel);
 
                 const modelsValue = document.createElement('span');
-                modelsValue.className = 'inline-block w-3/4 md:w-full';
+                modelsValue.className = 'inline-block w-3/4 lg:w-full';
 
                 const models = item.models.split(',').map(m => m.trim()).filter(m => m);
                 models.forEach(model => {
@@ -617,16 +620,16 @@
                 row.appendChild(modelsCell);
 
                 const apiKeysCell = document.createElement('td');
-                apiKeysCell.className = 'px-6 py-4 text-sm flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                apiKeysCell.className = 'px-6 py-4 text-sm flex lg:table-cell text-right lg:text-left border-b lg:border-b-0';
                 apiKeysCell.setAttribute('data-label', 'API Keys');
 
                 const apiKeysLabel = document.createElement('span');
-                apiKeysLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                apiKeysLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 apiKeysLabel.textContent = 'API Keys:';
                 apiKeysCell.appendChild(apiKeysLabel);
 
                 const apiKeysValue = document.createElement('span');
-                apiKeysValue.className = 'inline-block w-3/4 md:w-full';
+                apiKeysValue.className = 'inline-block w-3/4 lg:w-full';
 
                 const apiKeys = item.api_keys.split(',').map(k => k.trim()).filter(k => k);
                 apiKeys.forEach(apiKey => {
@@ -639,16 +642,16 @@
                 row.appendChild(apiKeysCell);
 
                 const workspacesCell = document.createElement('td');
-                workspacesCell.className = 'px-6 py-4 text-sm flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                workspacesCell.className = 'px-6 py-4 text-sm flex lg:table-cell text-right lg:text-left border-b lg:border-b-0';
                 workspacesCell.setAttribute('data-label', 'Workspaces');
 
                 const workspacesLabel = document.createElement('span');
-                workspacesLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                workspacesLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 workspacesLabel.textContent = 'Workspaces:';
                 workspacesCell.appendChild(workspacesLabel);
 
                 const workspacesValue = document.createElement('span');
-                workspacesValue.className = 'inline-block w-3/4 md:w-full';
+                workspacesValue.className = 'inline-block w-3/4 lg:w-full';
 
                 const workspaces = item.workspaces.split(',').map(w => w.trim()).filter(w => w);
                 workspaces.forEach(workspace => {
@@ -661,48 +664,48 @@
                 row.appendChild(workspacesCell);
 
                 const inputTokensCell = document.createElement('td');
-                inputTokensCell.className = 'px-6 py-4 text-sm text-gray-500 flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                inputTokensCell.className = 'px-6 py-4 text-sm text-gray-500 flex lg:table-cell text-right lg:text-left border-b lg:border-b-0';
                 inputTokensCell.setAttribute('data-label', 'Input Tokens');
 
                 const inputTokensLabel = document.createElement('span');
-                inputTokensLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                inputTokensLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 inputTokensLabel.textContent = 'Input Tokens:';
                 inputTokensCell.appendChild(inputTokensLabel);
 
                 const inputTokensValue = document.createElement('span');
-                inputTokensValue.className = 'inline-block w-3/4 md:w-full';
+                inputTokensValue.className = 'inline-block w-3/4 lg:w-full';
                 inputTokensValue.textContent = item.total_input_tokens.toLocaleString();
                 inputTokensCell.appendChild(inputTokensValue);
 
                 row.appendChild(inputTokensCell);
 
                 const outputTokensCell = document.createElement('td');
-                outputTokensCell.className = 'px-6 py-4 text-sm text-gray-500 flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                outputTokensCell.className = 'px-6 py-4 text-sm text-gray-500 flex lg:table-cell text-right lg:text-left border-b lg:border-b-0';
                 outputTokensCell.setAttribute('data-label', 'Output Tokens');
 
                 const outputTokensLabel = document.createElement('span');
-                outputTokensLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                outputTokensLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 outputTokensLabel.textContent = 'Output Tokens:';
                 outputTokensCell.appendChild(outputTokensLabel);
 
                 const outputTokensValue = document.createElement('span');
-                outputTokensValue.className = 'inline-block w-3/4 md:w-full';
+                outputTokensValue.className = 'inline-block w-3/4 lg:w-full';
                 outputTokensValue.textContent = item.total_output_tokens.toLocaleString();
                 outputTokensCell.appendChild(outputTokensValue);
 
                 row.appendChild(outputTokensCell);
 
                 const costCell = document.createElement('td');
-                costCell.className = 'px-6 py-4 text-sm text-gray-900 font-medium flex md:table-cell text-right md:text-left border-b-0';
+                costCell.className = 'px-6 py-4 text-sm text-gray-900 font-medium flex lg:table-cell text-right lg:text-left border-b-0';
                 costCell.setAttribute('data-label', 'Total Cost');
 
                 const costLabel = document.createElement('span');
-                costLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                costLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 costLabel.textContent = 'Total Cost:';
                 costCell.appendChild(costLabel);
 
                 const costValue = document.createElement('span');
-                costValue.className = 'inline-block w-3/4 md:w-full';
+                costValue.className = 'inline-block w-3/4 lg:w-full';
                 costValue.textContent = `$${item.total_cost.toFixed(2)}`;
                 costCell.appendChild(costValue);
 
@@ -718,19 +721,19 @@
                 const totalCost = data.reduce((sum, item) => sum + item.total_cost, 0);
 
                 const totalsRow = document.createElement('tr');
-                totalsRow.className = 'bg-gray-100 font-bold border-t-2 border-gray-300 block md:table-row mb-6 md:mb-0';
+                totalsRow.className = 'bg-gray-100 font-bold border-t-2 border-gray-300 block lg:table-row mb-6 lg:mb-0';
 
                 const totalLabelCell = document.createElement('td');
-                totalLabelCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                totalLabelCell.className = 'px-6 py-4 whitespace-nowrap text-sm text-gray-900 flex lg:table-cell text-right lg:text-left border-b lg:border-b-0';
                 totalLabelCell.setAttribute('data-label', 'Date');
 
                 const totalLabel = document.createElement('span');
-                totalLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                totalLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 totalLabel.textContent = 'Date:';
                 totalLabelCell.appendChild(totalLabel);
 
                 const totalValue = document.createElement('span');
-                totalValue.className = 'inline-block w-3/4 md:w-full';
+                totalValue.className = 'inline-block w-3/4 lg:w-full';
                 totalValue.textContent = 'TOTAL';
                 totalLabelCell.appendChild(totalValue);
 
@@ -739,7 +742,7 @@
                 const emptyLabels = ['Models', 'API Keys', 'Workspaces'];
                 for (let i = 0; i < 3; i++) {
                     const emptyCell = document.createElement('td');
-                    emptyCell.className = 'px-6 py-4 text-sm text-gray-500 hidden md:table-cell text-left border-b-0';
+                    emptyCell.className = 'px-6 py-4 text-sm text-gray-500 hidden lg:table-cell text-left border-b-0';
                     emptyCell.setAttribute('data-label', emptyLabels[i]);
 
                     const emptyValueSpan = document.createElement('span');
@@ -751,48 +754,48 @@
                 }
 
                 const totalInputTokensCell = document.createElement('td');
-                totalInputTokensCell.className = 'px-6 py-4 text-sm text-gray-900 font-bold flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                totalInputTokensCell.className = 'px-6 py-4 text-sm text-gray-900 font-bold flex lg:table-cell text-right lg:text-left border-b lg:border-b-0';
                 totalInputTokensCell.setAttribute('data-label', 'Input Tokens');
 
                 const inputTokensLabel = document.createElement('span');
-                inputTokensLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                inputTokensLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 inputTokensLabel.textContent = 'Input Tokens:';
                 totalInputTokensCell.appendChild(inputTokensLabel);
 
                 const inputTokensValue = document.createElement('span');
-                inputTokensValue.className = 'inline-block w-3/4 md:w-full';
+                inputTokensValue.className = 'inline-block w-3/4 lg:w-full';
                 inputTokensValue.textContent = totalInputTokens.toLocaleString();
                 totalInputTokensCell.appendChild(inputTokensValue);
 
                 totalsRow.appendChild(totalInputTokensCell);
 
                 const totalOutputTokensCell = document.createElement('td');
-                totalOutputTokensCell.className = 'px-6 py-4 text-sm text-gray-900 font-bold flex md:table-cell text-right md:text-left border-b md:border-b-0';
+                totalOutputTokensCell.className = 'px-6 py-4 text-sm text-gray-900 font-bold flex lg:table-cell text-right lg:text-left border-b lg:border-b-0';
                 totalOutputTokensCell.setAttribute('data-label', 'Output Tokens');
 
                 const outputTokensLabel = document.createElement('span');
-                outputTokensLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                outputTokensLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 outputTokensLabel.textContent = 'Output Tokens:';
                 totalOutputTokensCell.appendChild(outputTokensLabel);
 
                 const outputTokensValue = document.createElement('span');
-                outputTokensValue.className = 'inline-block w-3/4 md:w-full';
+                outputTokensValue.className = 'inline-block w-3/4 lg:w-full';
                 outputTokensValue.textContent = totalOutputTokens.toLocaleString();
                 totalOutputTokensCell.appendChild(outputTokensValue);
 
                 totalsRow.appendChild(totalOutputTokensCell);
 
                 const totalCostCell = document.createElement('td');
-                totalCostCell.className = 'px-6 py-4 text-sm text-gray-900 font-bold flex md:table-cell text-right md:text-left border-b-0';
+                totalCostCell.className = 'px-6 py-4 text-sm text-gray-900 font-bold flex lg:table-cell text-right lg:text-left border-b-0';
                 totalCostCell.setAttribute('data-label', 'Total Cost');
 
                 const costLabel = document.createElement('span');
-                costLabel.className = 'inline-block w-1/4 md:hidden font-semibold';
+                costLabel.className = 'inline-block w-1/4 lg:hidden font-semibold';
                 costLabel.textContent = 'Total Cost:';
                 totalCostCell.appendChild(costLabel);
 
                 const costValue = document.createElement('span');
-                costValue.className = 'inline-block w-3/4 md:w-full';
+                costValue.className = 'inline-block w-3/4 lg:w-full';
                 costValue.textContent = `$${totalCost.toFixed(2)}`;
                 totalCostCell.appendChild(costValue);
 
