@@ -464,10 +464,13 @@
             const clearButton = document.createElement('button');
             clearButton.className = 'mt-auto px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md text-sm';
             clearButton.textContent = 'Clear Filters';
+
             clearButton.addEventListener('click', () => {
-                document.querySelectorAll('.filter-select').forEach(select => {
-                    select.value = 'all';
+                Object.keys(filters).forEach(key => {
+                    filters[key] = undefined;
                 });
+                
+                saveFilters(filters);
                 processData();
             });
             filtersContainer.appendChild(clearButton);
